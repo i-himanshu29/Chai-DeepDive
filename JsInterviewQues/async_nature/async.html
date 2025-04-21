@@ -1,0 +1,399 @@
+<!-- Javascript is a synchronous , single-threaded language.
+This means Javascript can execute only one command at a time,
+and in a specific order.It does not move to the next line until
+the current line finishes executing. -->
+
+<!-- Synchronous Vs Asynchronous
+Synchronous - Task complete one after another,in order.
+Asynchronous - Tasks run in parallel, and whichever finishes first is handled first. -->
+
+<!-- Marathon analogy:
+Synchronous: Runners run one-by-one in a line.Only when one 
+finishes, the next starts.
+Asynchronous: All runners starts together,
+Whoever finishes first is attended first -->
+
+<!-- How do we know when we are writing asynchronus code?
+Whenever we use the following features, 
+we are working with async code:
+- setTimeout()
+- setInterval()
+- Promises
+- async/await 
+- fetch()
+- axios
+- XMLHttpRequest
+
+Synchronous code is called blocking , while
+asynchronous code is non-blocking  -->
+
+<!-- Callback Definition:
+A callback is a function passed as an argument to another function -->
+
+<!-- setTimeout jo delay leta hai wo minimum delay hai..usse upar bhi ho sakta hai  -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body{
+            background-color: black;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        h1{
+            text-align: center;
+            padding: 10px;
+            color:#fff;
+            font-size:45px;
+        }
+    </style>
+    <title>The Asyncronous Nature Of JS</title>
+</head>
+<body>
+    <h1>
+        Asyncronous <br/>
+        Nature of <br/> Javascript
+    </h1>
+    <script>
+        console.log('First')
+        console.log('Second')
+        console.log('Third')
+
+        setTimeout(()=>{
+            console.log("Haaji...")
+        },5000)//callback and delay take as argument
+
+        console.log('Fourth')
+        console.log('Fifth')
+        console.log('Sixth')
+
+        //callback
+
+        function chitukobulao(name){
+            console.log(`${name} aa ja, khana ready hai !`);
+        }
+
+        function maaNeKaha(callback){
+            console.log("Maa kise ko bualo...");
+            callback("chitu");
+        }
+
+        maaNeKaha(chitukobulao);
+
+        // Eg.2...
+        function multiply2Number(firstNum,secondNum){
+            console.log(firstNum*secondNum);
+        } 
+        function calc(value1,value2,Chamka){
+            Chamka(value1,value2);
+        }
+
+        calc(5,25,multiply2Number);
+
+        //Whenever we use callbacks, sometimes a problecm can arise called "callback hell"-
+        //nested callbacks, one inside another , and so on.
+        //Th2 forms a pyramid-like structure, also known as the "Pyramid of DOOM"
+
+        setTimeout(()=>{
+            console.log("1.Pani garam kiya");
+            setTimeout(()=>{
+                console.log("2.Maggi daali");
+                setTimeout(()=>{
+                    console.log("3.Masala daala");
+                    setTimeout(()=>{
+                        console.log("4.Maggi ready kha lo!");
+                    },1000);
+                },1000);
+            },1000);
+        },1000);
+
+
+        // let's say we are fetching data from a database(just a mock example below)
+        // Simulating a fake DB call
+
+        // delay possible while taking data hence use asynchronous becoz 
+        // we don't want that my next line code wait 
+
+        function dbCall(query){
+            setTimeout(()=>{
+                console.log(`Your data => ${query}`);
+            },1500)
+        }
+
+        dbCall(1729);//Ramanujan number
+        dbCall(499);
+        dbCall(11111);
+
+        // mujhe sab kuch ek saath nhi chahiye tha , sab step by step chale
+        // Pehle wala function chale tabhi doosra chale , fir teesra.
+        // Agar doosra nahi chala , toh teesra bhi nhi chale
+
+        //  Make it one by one. let's see how ?
+        
+        // function dbCall(query,nextDBCall){
+        //     setTimeout(()=>{
+        //         console.log(`Your data=> ${query}`);
+        //         nextDBCall();
+        //     },1500);
+        // }
+        // // dbCall(1,dbCall(2)); // while calling this type it give error : nextDBCall is not a function
+        // dbCall(1,()=>{
+        //     dbCall(2);
+        // });
+
+        // updated code eg:...
+
+        // function dbCalled(query,nextDBCall){
+        //     setTimeout(()=>{
+        //         console.log(`Your data 2=> ${query}`);
+        //         if(nextDBCalled){
+        //             nextDBCalled();
+        //         }
+        //     },1500);
+        // }
+        // 
+        // dbCalled(1,()=>{
+        //     dbCalled(2);
+        // });
+
+        // from above code we achieved one by one dbCalled execution
+
+        function dbCalled(query,nextDBCalled){
+            setTimeout(()=>{
+                console.log(`Your data 2=> ${query}`);
+                if(nextDBCalled){
+                    nextDBCalled();
+                }
+            },1500);
+        }
+
+        dbCalled(1,()=>{
+            dbCalled(2,()=>{
+                dbCalled(3);
+            });
+        });
+        // but that above dbCalled is going into 'call back hell'
+
+        // That is very confusing Hence we are going to use Promise 
+        // solution of call back hell is Promises
+
+        // Promise is for eventual completion of task. Promise is an object in JS.
+        // Prmoise has three states: pending , fullfilled and rejection.
+
+        let wada = new Promise((resolve,reject)=>{
+            console.log("Main hoon ek waada")
+            reject("Kuch toh issue hai!")
+        });
+
+        console.log(wada);
+        console.log(wada);
+        
+        // Eg... 
+        // In real world , we don't usually write our own Promises, 
+        // we mostly consume them.
+
+        function solution(query,answer){
+            return new Promise ((resolve,reject)=>{
+                setTimeout(()=>{
+                    console.log(`Your data 2=> ${query}`);
+                    resolve("Hogya")
+                    reject("dangerous");
+                    if(answer){
+                        answer();
+                    }
+                },2000);
+            })
+        }
+        
+        let returnPromise = solution(1);
+        console.log(returnPromise);
+
+        // Eg...
+
+        function apiCall(){
+            return new Promise((resolve,reject)=>{
+                console.log("Me ek waada hu!");
+                reject("Errrrorr!!");
+            });
+        }
+        let response = apiCall();
+        response
+            .then((res)=>{
+                console.log("Done =>",res);
+            })
+            .catch((err)=>{
+                console.log("Error => ",err);
+            })
+            .finally(()=>{
+                console.log("Main toh chalunga jee!!=>")
+            });
+
+            //Eg...
+
+            // function firstAsynchronousFunction(){
+            //     return new Promise((resolve,reject)=>{
+            //         setTimeout(()=>{
+            //             console.log("Pahla data lelo");
+            //             resolve("Pehla success");
+            //         },3000)
+            //     })
+            // }
+            // 
+            // function secondAsynchronousFunction(){
+            //     return new Promise((resolve,reject)=>{
+            //         setTimeout(()=>{
+            //             console.log("Dooshra da lelo");
+            //             resolve("Doosra success");
+            //         },2000)
+            //     })
+            // }
+            // 
+            // let returnPromise1 = firstAsynchronousFunction();
+            // returnPromise1.then((res)=>{
+            //     console.log(res);
+            // });
+            // 
+            // let returnPromise2 = secondAsynchronousFunction();
+            // returnPromise2.then((res)=>{
+            //     console.log(res);
+            // });
+            // 
+
+
+            //Eg...Promise Chaining
+        
+            function firstAsynchronousFunction(){
+                return new Promise((resolve,reject)=>{
+                    setTimeout(()=>{
+                        console.log("Pahla data lelo2");
+                        resolve("Pehla success2");
+                    },3000)
+                })
+            }
+
+            function secondAsynchronousFunction(){
+                return new Promise((resolve,reject)=>{
+                    setTimeout(()=>{
+                        console.log("Dooshra da lelo2");
+                        resolve("Doosra success2");
+                    },2000)
+                })
+            }
+
+            let returnPromise1 = firstAsynchronousFunction();
+            returnPromise1.then((res)=>{
+                console.log(res);
+                let returnPromise2 = secondAsynchronousFunction();
+                returnPromise2.then((res)=>{
+                    console.log(res);
+                });
+            });
+
+            // Above:
+            // Promise Chaining is the process of executing multiple
+            // .then() calls one after another , where each .then()
+            // waits for the previous one to complete.
+            // Promise chaining matlab ek ke baad ek kaam karna 
+            // using .then(), jahan agla step pehla complete hone
+            // ke baad hi chalega.
+        
+            //Eg...
+
+            function Chai(query){
+                return new Promise((resolve,reject)=>{
+                    setTimeout(()=>{
+                        console.log(`Your dat => ${query}`);
+                        resolve("111");
+                    },1000)
+                });
+            }
+
+            Chai(1).then((res)=>{
+                console.log(res);
+                Chai(2).then((res)=>{
+                    console.log(res);
+                    Chai(3).then((res)=>{
+                        console.log(res);
+                        Chai(4).then((res)=>{
+                            console.log(res);
+                            Chai(5).then((res)=>{
+                                console.log(res);
+                                Chai(6).then((res)=>{
+                                    console.log(res);
+                                    Chai(7).then((res)=>{
+                                        console.log(res);
+                                    });
+                                });
+                            });
+                        });
+                    });
+                });
+            });
+
+            // The Promise are also stuck under like the call back hell 
+            //so what's the point to use Promise - Pyramid of Doom
+            // Now we can change the way of writing code
+
+            Chai(1)
+                .then((res)=>{
+                    console.log(res);
+                    return Chai(2);
+                })
+                .then((res)=>{
+                    console.log(res);
+                    return Chai(3);
+                })
+                .then((res)=>{
+                    console.log(res);
+                    return Chai(4);
+                })
+                .then((res)=>{
+                    console.log(res);
+                    return Chai(5);
+                })
+                .then((res)=>{
+                    console.log(res);
+                    return Chai(6);
+                })
+                .then((res)=>{
+                    console.log(res);
+                    return Chai(7);
+                })
+
+
+                // Async-await
+                // It is a way to write asynchronus code that looks
+                // and behaves like synchronous code, making it easier
+                // to read and manage.
+                // It always returns a promise await pauses the execution
+                // of its surrounding async function untill the promise
+                // is settled
+
+                function api(){
+                    return new Promise((resolve,reject)=>{
+                        setTimeout(()=>{
+                            console.log("Imp data");
+                            resolve(200);
+                        },2000);
+                    });
+                }
+
+                async function getData(){
+                    try{
+                        await api();
+                        await api();
+                    }catch(error){
+                        console.log(error);
+                    }
+                }
+                console.log(getData());
+
+                
+    </script>
+</body>
+</html>
